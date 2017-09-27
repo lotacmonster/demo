@@ -1,6 +1,7 @@
 package server.giaodien;
 
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,14 +9,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import server.main.MainServer;
 
-public class GiaoDienTaoCong extends JFrame implements ActionListener
+public class GiaoDienTaoCong extends Frame implements ActionListener
 {
 	/**
 	 * 
@@ -30,11 +30,12 @@ public class GiaoDienTaoCong extends JFrame implements ActionListener
 	public GiaoDienTaoCong(MainServer mainServer) 
 	{
 		// TODO Auto-generated constructor stub
-		super("Thắp Sáng Tri Thức.");
+		super("Thắp Sáng Tri Thức - Server.");
 		this.mainServer = mainServer;	
 		this.add(taoPanelChinh());
 		this.setSize(300, 200);
 		this.addWindowListener(mainServer);
+		this.setIconImage(mainServer.iconChinh);
 	} 
 	
 	JPanel taoPanelChinh()
@@ -42,6 +43,7 @@ public class GiaoDienTaoCong extends JFrame implements ActionListener
 		JPanel panel = new JPanel(new GridLayout(3, 1));
 		JLabel nhanTieuDe = new JLabel("Nhập cổng kết nối: ");
 		nhapPort = new JTextField();
+		nhapPort.setText("7777");
 		nhapPort.addActionListener(this);
 		panel.add(nhanTieuDe);
 		panel.add(nhapPort);

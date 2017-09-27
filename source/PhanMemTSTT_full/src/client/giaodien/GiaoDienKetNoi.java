@@ -1,6 +1,7 @@
 package client.giaodien;
 
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,7 +19,7 @@ import client.main.MainClient;
 import client.socket.ThreadClient;
 
 
-public class GiaoDienKetNoi extends JFrame implements ActionListener{
+public class GiaoDienKetNoi extends Frame implements ActionListener{
 
 	/**
 	 * 
@@ -37,6 +38,7 @@ public class GiaoDienKetNoi extends JFrame implements ActionListener{
 		this.add(taoPanelChinh());
 		this.addWindowListener(mainClient);
 		this.threadClient = mainClient.threadClient;
+		this.setIconImage(mainClient.iconChinh);
 	}
 
 	// tạo giao diện
@@ -78,6 +80,8 @@ public class GiaoDienKetNoi extends JFrame implements ActionListener{
 		
 		nhapHost = new JTextField();
 		nhapPort = new JTextField();
+		nhapHost.setText("localhost");
+		nhapPort.setText("7777");
 		panel.add(nhapHost);
 		panel.add(nhapPort);
 		

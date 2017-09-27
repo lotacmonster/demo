@@ -1,39 +1,43 @@
-package client.giaodien;
+package clienthienthi.giaodien;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import client.main.MainClient;
+import clienthienthi.main.HienThiMain;
 
-public class GiaoDienDangNhap extends Frame implements ActionListener{
+public class GiaoDienKetNoi extends Frame implements ActionListener{
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	MainClient mainClient;
-	JTextField nhapID, nhapPass;
-	
-	String actionDangNhap = "dangnhap";
-	
-	public GiaoDienDangNhap(MainClient mainClient) {
-		// TODO Auto-generated constructor stub
+	HienThiMain hienThiMain;
+	JTextField nhapPort, nhapHost;
+	String actionKetNoi = "ketnoi";
+	public GiaoDienKetNoi(HienThiMain hienThiMain) 
+	{
 		super("Thắp sáng tri thức - Client");
-		this.mainClient = mainClient;
 		this.setSize(300, 200);
-		this.addWindowListener(mainClient);
 		this.add(taoPanelChinh());
-		this.setIconImage(mainClient.iconChinh);
+		this.hienThiMain = hienThiMain;
+		this.addWindowListener(hienThiMain);
+		this.setIconImage(hienThiMain.iconChinh);
 	}
 
+
+
+	// tạo giao diện
 	JPanel taoPanelChinh()
 	{
 		JPanel panel = new JPanel(new BorderLayout());
@@ -47,22 +51,22 @@ public class GiaoDienDangNhap extends Frame implements ActionListener{
 	JPanel taoPanelTop()
 	{
 		JPanel panel = new JPanel();
-		panel.add(taoNhan("Đăng nhập tài khoản máy chủ: "));
+		panel.add(taoNhan("Kết nối đến máy chủ: "));
 		return panel;
 	}
 	
 	JPanel taoPanelBot()
 	{
 		JPanel panel = new JPanel();
-		panel.add(taoNut("Đăng nhập.", actionDangNhap));
+		panel.add(taoNut("Kết Nối.", actionKetNoi));
 		return panel;
 	}
 	
 	JPanel taoPanelTrai()
 	{
 		JPanel panel = new JPanel(new GridLayout(2, 1));
-		panel.add(taoNhan("Nhập ID: "));
-		panel.add(taoNhan("Nhập Pass: "));
+		panel.add(taoNhan("Nhap Host: "));
+		panel.add(taoNhan("Nhập Port: "));
 		return panel;
 	}
 	
@@ -70,10 +74,13 @@ public class GiaoDienDangNhap extends Frame implements ActionListener{
 	{
 		JPanel panel = new JPanel(new GridLayout(2, 1));
 		
-		nhapID = new JTextField();
-		nhapPass = new JTextField();
-		panel.add(nhapID);
-		panel.add(nhapPass);
+		nhapHost = new JTextField();
+		nhapPort = new JTextField();
+		nhapHost.setText("localhost");
+		nhapPort.setText("7777");
+		panel.add(nhapHost);
+		panel.add(nhapPort);
+		
 		return panel;
 	}
 	///////
@@ -90,31 +97,34 @@ public class GiaoDienDangNhap extends Frame implements ActionListener{
 		nut.addActionListener(this);
 		return nut;
 	}
-	
-	/*
-	 * Khối lênh hiển thị
-	 */
 	public void hienThi()
 	{
 		this.setVisible(true);
 	}
+	/*******
+	 * 
+	 * 
+	 *******/
 	
 	public void anDi()
 	{
 		this.setVisible(false);
 	}
-	
-	/*
-	 * khối lệnh bắt sự kiện
-	 */
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		if(e.getActionCommand().equals(actionDangNhap))
+		if(e.getActionCommand().equals(actionKetNoi))
 		{
-			mainClient.dangNhap(nhapID.getText(), nhapPass.getText());
+			Matcher matcher = Pattern.compile("\\d*").matcher(nhapPort.getText());
+			if(matcher.matches())
+			{
+				hienThiMain.taoKetNoi(nhapHost.getText(), Integer.parseInt(nhapPort.getText()));
+			}
+			else
+			{
+				JOptionPane.showMessageDialog(null, "Nhập port chưa đúng định dạng");
+			}
 		}
-		
 	}
 }

@@ -1,4 +1,4 @@
-package client.giaodien;
+package clienthienthi.giaodien;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
@@ -7,31 +7,31 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import client.main.MainClient;
+import clienthienthi.main.HienThiMain;
 
-public class GiaoDienDangNhap extends Frame implements ActionListener{
+public class GiaoDienDangNhap extends Frame implements ActionListener
+{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	MainClient mainClient;
+	HienThiMain hienThiMain;
 	JTextField nhapID, nhapPass;
 	
 	String actionDangNhap = "dangnhap";
 	
-	public GiaoDienDangNhap(MainClient mainClient) {
-		// TODO Auto-generated constructor stub
-		super("Thắp sáng tri thức - Client");
-		this.mainClient = mainClient;
+	public GiaoDienDangNhap(HienThiMain hienThiMain) 
+	{
+		super("Thắp sáng tri thức - Hiển thị");
 		this.setSize(300, 200);
-		this.addWindowListener(mainClient);
+		this.hienThiMain = hienThiMain;
+		this.addWindowListener(hienThiMain);
 		this.add(taoPanelChinh());
-		this.setIconImage(mainClient.iconChinh);
+		this.setIconImage(hienThiMain.iconChinh);
 	}
 
 	JPanel taoPanelChinh()
@@ -113,8 +113,11 @@ public class GiaoDienDangNhap extends Frame implements ActionListener{
 	{
 		if(e.getActionCommand().equals(actionDangNhap))
 		{
-			mainClient.dangNhap(nhapID.getText(), nhapPass.getText());
+			hienThiMain.dangNhap(nhapID.getText(), nhapPass.getText());
+			return ;
 		}
 		
 	}
+	
+
 }

@@ -33,7 +33,7 @@ public class ThreadServer extends Thread
 		}
 		catch(IOException ex)
 		{
-		
+			mainServer.loaiMay(ID);
 		}
 	}
 	
@@ -46,6 +46,7 @@ public class ThreadServer extends Thread
 	{
 		try
 		{
+			System.out.println("gui: " + tinNhan);
 			bufferedWriter.write(tinNhan);
 			bufferedWriter.newLine();
 			bufferedWriter.flush();
@@ -53,6 +54,7 @@ public class ThreadServer extends Thread
 		catch(IOException ex)
 		{
 			JOptionPane.showMessageDialog(null, "Lỗi gửi tin đến máy: "+ID);
+			mainServer.loaiMay(ID);
 		}
 	}
 	
@@ -71,6 +73,7 @@ public class ThreadServer extends Thread
 		catch(IOException ex)
 		{
 			JOptionPane.showMessageDialog(null, "Lỗi đọc dữ liệu: "+ID);
+			mainServer.loaiMay(ID);
 		}
 	}
 	

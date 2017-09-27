@@ -2,15 +2,23 @@ package server.giaodien;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -19,13 +27,16 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 import server.main.MainServer;
+import server.socket.TaoServer;
 
-public class GiaoDienChinh extends JFrame implements ActionListener{
+public class GiaoDienChinh extends Frame implements ActionListener{
 
 	/**
 	 * 
@@ -35,51 +46,75 @@ public class GiaoDienChinh extends JFrame implements ActionListener{
 	JTextArea hienThiTraLoi;
 	JTextArea hienThiMayKetNoi;
 	JTextField thietLapThoiGian;
-	String actionChay = "run", actionCancel = "cancel", actionTamDung = "tamdung";
+	String actionChay = "run", actionCancel = "cancel", actionReset = "reset";
 	JLabel thoiGian;
-	Border border = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-	JMenuBar menuBar = new JMenuBar();
-	JMenu menuCaiDat, menuHelp;
-	JMenuItem itemUser, itemPort, itemExit, itemHelp;
+	JScrollPane cuonHienThiTraLoi, cuonHienThiMay;
+	Border border = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 10);
+	MenuBar menuBar = new MenuBar();
+	Menu menuCaiDat, menuHelp;
+	
+	MenuItem itemUser, itemExit, itemHelp;
 	GiaoDienTuyChon giaoDienTuyChon = new GiaoDienTuyChon(this);
 	int phut=0, giay=0;
 	boolean ngatThoiGian = false;
+	boolean dongHoDangChay = false;
+
 	int thoiGianChay = 0;
+	Timer timer;
+	Image iconMain;
 	
 	public GiaoDienChinh(MainServer mainServer) 
 	{
 		// TODO Auto-generated constructor stub
-		super("Thắp sáng tri thức.");
+		super("Thắp sáng tri thức - Server");
 		this.mainServer = mainServer;
 		this.taoMenuBar();
-		this.setJMenuBar(menuBar);
+		this.setMenuBar(menuBar);
 		this.add(taoPanelChinh());
 		this.setSize(1000, 700);
 		this.addWindowListener(mainServer);
+		this.setIconImage(mainServer.iconChinh);
 	}
 
 	void taoMenuBar()
 	{
-		menuCaiDat = new JMenu("Cài đặt");
-		menuHelp = new JMenu("Help?");
+		menuCaiDat = new Menu("Cài đặt");
+		menuHelp = new Menu("Help?");
 		menuBar.add(menuCaiDat);
 		menuBar.add(menuHelp);
 		
-		itemUser = new JMenuItem("Client-User");
-		itemPort = new JMenuItem("Tạo lại port");
-		itemExit = new JMenuItem("Exit");
-		itemHelp = new JMenuItem("Help");
+		itemUser = new MenuItem("Client-User");
+		itemExit = new MenuItem("Exit");
+		itemHelp = new MenuItem("Help");
 		itemUser.addActionListener(this);
-		itemPort.addActionListener(this);
 		itemExit.addActionListener(this);
 		itemHelp.addActionListener(this);
 		
 		menuHelp.add(itemHelp);
 		menuCaiDat.add(itemUser);
-		menuCaiDat.add(itemPort);
 		menuCaiDat.add(itemExit);
 	}
 	JPanel taoPanelChinh()
+	{
+		JPanel panel = new JPanel(new BorderLayout(70, 70));
+		panel.add(taoPanelCenter(), BorderLayout.CENTER);
+		panel.add(taoPanelDiem(), BorderLayout.NORTH);
+		return panel;
+	}
+	
+	/*
+	 * 
+	 * panel để cài đặt thanh set điểm
+	 */
+	JPanel taoPanelDiem()
+	{
+		JPanel panel = new JPanel();
+		panel.add(taoNhan("Thanh chứa điểm"));
+		return panel;
+	}
+	
+	
+	JPanel taoPanelCenter()
 	{
 		JPanel panel = new JPanel(new GridLayout(1, 2));
 		panel.add(taoPanelTrai());
@@ -89,18 +124,37 @@ public class GiaoDienChinh extends JFrame implements ActionListener{
 	
 	JPanel taoPanelPhai()
 	{
-		JPanel panel = new JPanel(new BorderLayout(10, 10));
+		JPanel panel = new JPanel(new BorderLayout());
 		hienThiTraLoi = new JTextArea();
+		hienThiTraLoi.setFont(new Font("Arial", 0, 15));
+		cuonHienThiTraLoi = new JScrollPane(hienThiTraLoi);
 		panel.setBorder(border);
-		panel.add(hienThiTraLoi, BorderLayout.CENTER);
+		panel.add(cuonHienThiTraLoi, BorderLayout.CENTER);
+		panel.add(cuonHienThiTraLoi.getVerticalScrollBar(), BorderLayout.EAST);
+		panel.add(cuonHienThiTraLoi.getHorizontalScrollBar(), BorderLayout.SOUTH);
 		return panel;
 	}
+	
+	
 	JPanel taoPanelTrai()
 	{
 		JPanel panel = new JPanel(new GridLayout(2, 1));
-		hienThiMayKetNoi = new JTextArea("Chưa có máy kết nối...", 20, 20);
-		hienThiMayKetNoi.setBorder(border);
-		panel.add(hienThiMayKetNoi);
+		
+		JPanel panelHienThiMay = new JPanel(new BorderLayout());
+		
+		/*
+		 
+		  */
+		hienThiMayKetNoi = new JTextArea("Chưa có máy kết nối...");
+		hienThiMayKetNoi.setFont(new Font("Times New Roman", 0, 15));
+		cuonHienThiMay = new JScrollPane(hienThiMayKetNoi);
+		panelHienThiMay.add(cuonHienThiMay, BorderLayout.CENTER);
+		panelHienThiMay.add(cuonHienThiMay.getVerticalScrollBar(), BorderLayout.EAST);
+		
+		/*
+		 * 
+		 */
+		panel.add(panelHienThiMay);
 		panel.add(taoPanelThoiGian());
 		return panel;
 	}
@@ -111,13 +165,16 @@ public class GiaoDienChinh extends JFrame implements ActionListener{
 		
 		JPanel panelTrai = new JPanel(new GridLayout(2, 1));
 		thietLapThoiGian = new JTextField();
+		thietLapThoiGian.setBorder(border);
 		thietLapThoiGian.setActionCommand(actionChay);
 		thietLapThoiGian.setText("10");
 		thietLapThoiGian.addActionListener(this);
-		thoiGian = new JLabel("00 : 00");
-		thoiGian.setAlignmentY(CENTER_ALIGNMENT);
-		thoiGian.setSize(300, 20);
+		thietLapThoiGian.setFont(new Font("Arial", Font.ITALIC, 50));
 		
+		thoiGian = new JLabel(" 00 ");
+		thoiGian.setSize(300, 20);
+		thoiGian.setBorder(border);
+		thoiGian.setFont(new Font("Times New Roman", Font.BOLD , 50));
 		panelTrai.setBorder(border);
 		panelTrai.add(thoiGian);
 		panelTrai.add(thietLapThoiGian);
@@ -125,10 +182,12 @@ public class GiaoDienChinh extends JFrame implements ActionListener{
 		panel.add(panelTrai);
 		
 		JPanel panelPhai = new JPanel(new GridLayout(3, 1));
+		panelPhai.setBorder(border);
 		panelPhai.add(taoNut("Bắt Đầu.", actionChay));
-		panelPhai.add(taoNut("Tạm Dừng", actionTamDung));
-		panelPhai.add(taoNut("Kết Thúc", actionCancel));
+		panelPhai.add(taoNut("Kết thúc", actionCancel));
+		panelPhai.add(taoNut("Reset", actionReset));
 		panel.add(panelPhai);
+		
 		return panel;
 	}
 	
@@ -154,7 +213,7 @@ public class GiaoDienChinh extends JFrame implements ActionListener{
 	
 	public void hienThiTraLoi(String tinNhan)
 	{
-		hienThiMayKetNoi.append("/n"+tinNhan);
+		hienThiTraLoi.append(tinNhan);
 	}
 	
 	public void xoaTraLoi()
@@ -177,41 +236,36 @@ public class GiaoDienChinh extends JFrame implements ActionListener{
 	private void chayDongHo(int thoiGian)
 	{
 		this.tangThoiGian();
-		Timer timer = new Timer();
+		if(thoiGian == 0)return ;
+		timer = new Timer();
+		timer.purge();
 		timer.schedule(new DongHoSuKien(this, thoiGian), 1000, 1000);
+		
 	}
 	
 	public void tangThoiGian()
 	{
-		if(giay==60)
-		{
-			giay= 0;
-			phut++;
-		}
-		else 
-		{
-			giay++;
-		}
+		giay++;
 		
-		String time="";
-		time+=String.valueOf(phut/10);
-		time+=String.valueOf(phut%10);
-		time+=" : ";
-		time+=String.valueOf(giay/10);
-		time+=String.valueOf(giay%10);
+		String time=String.valueOf(giay);
 		thoiGian.setText(time);
-		mainServer.guiTinNhanDenToanBo("Thoi gian: " + time);
+		if(phut == 0 && giay == 0) mainServer.guiTinNhanDenToanBo("Bat Dau: ");
+		else mainServer.guiTinNhanDenToanBo("Thoi gian: " + time);
 	}
-	
+	 
 	public void inKetQua()
 	{
-		
+		mainServer.guiTinNhanDenToanBo("Ket thuc: ");
+		mainServer.guiBangRank();
 	}
+	@SuppressWarnings("deprecation")
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		if(e.getActionCommand().equals(actionChay))
+		if(e.getActionCommand().equals(actionChay) && !dongHoDangChay)
 		{
+			dongHoDangChay = true;
+			mainServer.taoThoiGianBatDau();
 			if(thoiGianChay == 0)
 				{
 					Matcher matcher = Pattern.compile("\\d*").matcher(thietLapThoiGian.getText());
@@ -232,20 +286,23 @@ public class GiaoDienChinh extends JFrame implements ActionListener{
 				{
 					thoiGianChay = 0;
 				}
-			ngatThoiGian = true;
 			chayDongHo(thoiGianChay);
 			thoiGianChay = 0;
 		}
 		
-		if(e.getActionCommand().equals(actionCancel))
+		if(e.getActionCommand().equals(actionReset)&& dongHoDangChay)
 		{
-			thoiGian.setText(thoiGian.getText()+"  Gián đoạn");
-			ngatThoiGian = false;
+			thoiGian.setText(" 00 ");
+			mainServer.guiTinNhanDenToanBo("Reset: ");
+			mainServer.resetBangRank();
+			dongHoDangChay = false;
 		}
 		
-		if(e.getActionCommand().equals(actionTamDung))
+		if(e.getActionCommand().equals(actionCancel) && dongHoDangChay)
 		{
-			JOptionPane.showMessageDialog(this, "Nút này chưa được cài đặt");
+			thoiGian.setText(thoiGian.getText()+"  Gián đoạn");
+			timer.cancel();
+			mainServer.guiTinNhanDenToanBo("Ket thuc: ");
 		}
 		
 		if(e.getSource() == itemExit)
@@ -253,11 +310,6 @@ public class GiaoDienChinh extends JFrame implements ActionListener{
 			mainServer.exitChuongTrinh();
 		}
 		
-		if(e.getSource() == itemPort)
-		{
-			this.anDi();
-			mainServer.batDau();
-		}
 		
 		if(e.getSource() == itemUser)
 		{
@@ -292,12 +344,15 @@ class DongHoSuKien extends TimerTask
 	public void run()
 	{
 		demThoiGian++;
+		Calendar calendar = Calendar.getInstance();
+		System.out.println(calendar.get(Calendar.SECOND) + " " + calendar.get(Calendar.MILLISECOND));
 		giaoDienChinh.tangThoiGian();
 		if(demThoiGian >= tongThoiGian)
 			{
 				this.cancel();
 				giaoDienChinh.inKetQua();
 			}
-		if(giaoDienChinh.ngatThoiGian == false)this.cancel();
+		
+		//if(giaoDienChinh.ngatThoiGian == false)this.cancel();
 	}
 }

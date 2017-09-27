@@ -32,6 +32,7 @@ public class TaoServer extends Thread
 		{
 			serverSocket = new ServerSocket(portServer);
 			JOptionPane.showMessageDialog(null, "Tạo cổng thành công");
+			this.start();
 			return true;
 		}
 		catch(IOException ex)
@@ -40,7 +41,8 @@ public class TaoServer extends Thread
 			return false;
 		}
 	}
-	
+	 
+	//
 	
 	//lắng nghe máy khách kết nối
 	public void run()

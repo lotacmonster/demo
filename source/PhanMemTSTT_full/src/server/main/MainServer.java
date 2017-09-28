@@ -24,9 +24,9 @@ public class MainServer extends WindowAdapter implements Runnable
 	public Image iconChinh = imageIcon.getImage();
 	 public TaoServer taoServer = new TaoServer(this);
 	GiaoDienTaoCong giaoDienTaoCong = new GiaoDienTaoCong(this);
-	GiaoDienChinh giaoDienChinh = new GiaoDienChinh(this);
-	String linkFile = "e:/log.txt";
-	File file = new File(linkFile);
+	GiaoDienChinh giaoDienChinh;
+	public String linkFile = "e:/log.txt";
+	File file = null;
 	FileWriter fileWriter = null;
 	
 	
@@ -41,19 +41,20 @@ public class MainServer extends WindowAdapter implements Runnable
 	boolean daGuiTinHienThi = false;
 	public String kieuDuLieu = "UTF-8";
 	
-	String[] idDangNhap = {"user01", "user02", "user03", "user04"};
-	int gioiHanSoID = 4;
-	String[] passDangNhap = {"pass01", "pass02", "pass03", "pass04"};
-	String[] tenNguoiChoi = new String[gioiHanSoID + 5];
+	public String[] idDangNhap = {"user01", "user02", "user03", "user04"};
+	public int gioiHanSoID = 4;
+	public String[] passDangNhap = {"pass01", "pass02", "pass03", "pass04"};
+	public String[] tenNguoiChoi = new String[gioiHanSoID + 5];
 
 	boolean[] tinhTrangDangNhap = {false, false, false, false, false , false};
 	public long[] thoiGianCuoiCung = new long[gioiHanSoID +5];
 	String[] cauTraLoi = new String[gioiHanSoID+5];
 	
-	String idHienThi = "userhienthi";
-	String passHienThi = "passhienthi";
+	public String idHienThi = "userhienthi";
+	public String passHienThi = "passhienthi";
 	boolean tinhTrangHienThi = false;
 	Thread threadHienThiMay = new Thread(this);
+	public int soCauHoi = 0;
 	
 	long thoiGianBatDau = 0;
 	
@@ -66,35 +67,14 @@ public class MainServer extends WindowAdapter implements Runnable
 
 	public MainServer()
 	{
-		
-	//	taoLinkFile();
-	}
-	
-//	public void taoLinkFile()
-//	{
-//		try
-//		{
-//			fileWriter = new FileWriter(file);
-//		}
-//		catch(IOException ex)
-//		{
-//			linkFile = JOptionPane.showInputDialog(null, "Không tìm thấy file log.txt,\nMời nhập lại link file,\n nhập NO để thoát.");
-//			if(linkFile.equals("NO"))exitChuongTrinh();
-//			file = new File(linkFile);
-//			taoLinkFile();
-//		}
-//		
-//	}
-	
-	public void batDau()
-	{
+
 		checkThreadServers = new boolean[gioiHanSoClient];
 		idDangNhapTuongUng = new int[gioiHanSoClient];
 		for(int i=0;i<gioiHanSoClient;i++)checkThreadServers[i] = false;
 		for(int i=0;i<gioiHanSoClient;i++)idDangNhapTuongUng[i] = gioiHanSoID;
 		for(int i=0;i<gioiHanSoID;i++)
 		{
-			thoiGianCuoiCung[0] = 100;
+			thoiGianCuoiCung[0] = 10000000000L;
 			cauTraLoi[i] = "...";
 		}
 		
@@ -102,9 +82,34 @@ public class MainServer extends WindowAdapter implements Runnable
 		tenNguoiChoi[1] = "Nguyen Van B";
 		tenNguoiChoi[2] = "Nguyen Van C";
 		tenNguoiChoi[3] = "Nguyen Van D";
+		taoLinkFile();
+		giaoDienChinh  = new GiaoDienChinh(this);
+	}
+	
+	public void taoLinkFile()
+	{
+		try
+		{
+			file = new File(linkFile);
+			fileWriter = new FileWriter(file, true);
+		}
+		catch(IOException ex)
+		{
+			linkFile = JOptionPane.showInputDialog(null, "Không tìm thấy file log.txt,\nMời nhập lại link file,\n nhập NO để thoát.");
+			if(linkFile.equals("NO"))exitChuongTrinh();
+			file = new File(linkFile);
+			taoLinkFile();
+		}
+	}
+	
+	public void batDau()
+	{
+		
 		
 		khoiChayThreadHienThiMay();
 		giaoDienTaoCong.hienThi();
+		//giaoDienChinh.giaoDienTuyChon.hienThi();
+
 	}
 	
 	public void khoiChayThreadHienThiMay()
@@ -236,7 +241,9 @@ public class MainServer extends WindowAdapter implements Runnable
 			cauTraLoi[idDangNhapTuongUng[idClient]] = hienThi;
 			
 			guiTinNhan("Dap an: "+thoiGian + hienThi, idClient);
-			String hienThiTraLoi = "\n#" + String.valueOf(idClient) + " : " + idDangNhap[idDangNhapTuongUng[idClient]]+ " " +thoiGian + hienThi;
+			String hienThiTraLoi = "\n #" + String.valueOf(idClient) + " : " + idDangNhap[idDangNhapTuongUng[idClient]]+ " " +thoiGian + hienThi;
+			
+			ghiFile("\n" + "-> Trả lời: " +hienThiTraLoi);
 			
 			giaoDienChinh.hienThiTraLoi(hienThiTraLoi);
 			return ;
@@ -246,20 +253,56 @@ public class MainServer extends WindowAdapter implements Runnable
 	
 	public void guiBangRank()
 	{
-		int[] mang = {0, 1, 2, 3};
+		boolean [] mang = {true, true, true, true,true};
+		long max = 0;
+		int vtmax = -1;
+		max = 200000000000L;
 		for(int i=0;i<4;i++)
-			for(int j=i+1;j<4;j++)
-				if(thoiGianCuoiCung[i] > thoiGianCuoiCung[j])
-				{
-					int tmp = mang[i];
-					mang[i] = mang[j];
-					mang[j] = tmp;
-				}
+			if(thoiGianCuoiCung[i]<max && mang[i])
+			{
+				max = thoiGianCuoiCung[i];
+				vtmax = i;
+			}
+		guiTinNhan("#1: &" + tenNguoiChoi[vtmax] + "&" + tinhThoiGianTuongDoi(thoiGianCuoiCung[vtmax]) + "&" + cauTraLoi[vtmax] , 28);
+		System.out.println(tenNguoiChoi[vtmax] + " " + tinhThoiGianTuongDoi(thoiGianCuoiCung[vtmax]));
+		mang[vtmax] = false;
 		
-		guiTinNhan("#1: &" + tenNguoiChoi[mang[0]] + "&" + tinhThoiGianTuongDoi(thoiGianCuoiCung[mang[0]]) + "&" + cauTraLoi[mang[0]] , 28);
-		guiTinNhan("#2: &" + tenNguoiChoi[mang[1]] + "&" + tinhThoiGianTuongDoi(thoiGianCuoiCung[mang[1]]) + "&" + cauTraLoi[mang[1]] , 28);
-		guiTinNhan("#3: &" + tenNguoiChoi[mang[2]] + "&" + tinhThoiGianTuongDoi(thoiGianCuoiCung[mang[2]]) + "&" + cauTraLoi[mang[2]] , 28);
-		guiTinNhan("#4: &" + tenNguoiChoi[mang[3]] + "&" + tinhThoiGianTuongDoi(thoiGianCuoiCung[mang[3]]) + "&" + cauTraLoi[mang[3]] , 28);
+		max = 200000000000L;
+		for(int i=0;i<4;i++)
+			if(thoiGianCuoiCung[i]<max && mang[i])
+			{
+				max = thoiGianCuoiCung[i];
+				vtmax = i;
+			}
+		guiTinNhan("#2: &" + tenNguoiChoi[vtmax] + "&" + tinhThoiGianTuongDoi(thoiGianCuoiCung[vtmax]) + "&" + cauTraLoi[vtmax] , 28);
+		System.out.println(tenNguoiChoi[vtmax] + " " + tinhThoiGianTuongDoi(thoiGianCuoiCung[vtmax]));
+
+		mang[vtmax] = false;
+		
+		max = 200000000000L;
+		for(int i=0;i<4;i++)
+			if(thoiGianCuoiCung[i]<max && mang[i])
+			{
+				max = thoiGianCuoiCung[i];
+				vtmax = i;
+			}
+		guiTinNhan("#3: &" + tenNguoiChoi[vtmax] + "&" + tinhThoiGianTuongDoi(thoiGianCuoiCung[vtmax]) + "&" + cauTraLoi[vtmax] , 28);
+		System.out.println(tenNguoiChoi[vtmax] + " " + tinhThoiGianTuongDoi(thoiGianCuoiCung[vtmax]));
+
+		mang[vtmax] = false;
+		
+		max = 200000000000L;
+		for(int i=0;i<4;i++)
+			if(thoiGianCuoiCung[i]<max && mang[i])
+			{
+				max = thoiGianCuoiCung[i];
+				vtmax = i;
+			}
+		guiTinNhan("#4: &" + tenNguoiChoi[vtmax] + "&" + tinhThoiGianTuongDoi(thoiGianCuoiCung[vtmax]) + "&" + cauTraLoi[vtmax] , 28);
+		System.out.println(tenNguoiChoi[vtmax] + " " + tinhThoiGianTuongDoi(thoiGianCuoiCung[vtmax]));
+
+		mang[vtmax] = false;
+		
 	}
 	
 	String tinhThoiGianTuongDoi(long thoiGian)
@@ -269,7 +312,7 @@ public class MainServer extends WindowAdapter implements Runnable
 		System.out.println("Thoi gian tuong doi "+thoiGianRes + " " + thoiGian);
 		if(thoiGianRes<= 0) thoiGianRes = 97000;
 		String res = String.valueOf(thoiGianRes/1000) + "." + String.valueOf(thoiGianRes%1000);
-		if(thoiGianRes > 600000) res = "ERR";
+		if(thoiGianRes > 60000) res = "ERR";
 		return res;
 	}
 	
@@ -277,7 +320,7 @@ public class MainServer extends WindowAdapter implements Runnable
 	{
 		for(int i=0; i<gioiHanSoID; i++)
 		{
-			thoiGianCuoiCung[i]=100;
+			thoiGianCuoiCung[i]=100000000000L;
 			cauTraLoi[i] = "...";
 		}
 		thoiGianBatDau = 0;
@@ -286,6 +329,9 @@ public class MainServer extends WindowAdapter implements Runnable
 	public void taoThoiGianBatDau()
 	{
 		thoiGianBatDau = tinhThoiGian();
+		String hienThi = "\n ********************\n Câu hỏi số #" +String.valueOf(soCauHoi++) + " : " + tinhToanThoiGian() + "\n";
+		giaoDienChinh.hienThiTraLoi(hienThi);
+		ghiFile(hienThi);
 		System.out.println("thoi gian bat dau: " +  thoiGianBatDau);
 	}
 	
@@ -328,15 +374,7 @@ public class MainServer extends WindowAdapter implements Runnable
 			guiTinNhan(tinNhan, i);
 	}
 	
-	//bắt sự kiện
-	public void exitChuongTrinh()
-	{
-		int hoi;
-		hoi=JOptionPane.showConfirmDialog(null, "Bạn có muốn thoát chương trình không?",null, JOptionPane.YES_NO_OPTION);
-        if (hoi == JOptionPane.YES_OPTION) {
-            System.exit(0);
-        }
-	}
+	
 	
 	
 	//cac ham xu li
@@ -364,10 +402,41 @@ public class MainServer extends WindowAdapter implements Runnable
 		return thoiGian;
 	}
 	
-	public void ghiFile()
+	public void ghiFile(String duLieu)
 	{
-		
+		try
+		{
+			fileWriter = new FileWriter(file, true);
+			fileWriter.write(duLieu);
+			fileWriter.close();
+		}
+		catch(IOException ex)
+		{
+			JOptionPane.showMessageDialog(null, "Có lỗi xảy ra với file log");
+			taoLinkFile();
+			ghiFile(duLieu);
+		}
 	}
+	
+	//bắt sự kiện
+		public void exitChuongTrinh()
+		{
+			int hoi;
+			hoi=JOptionPane.showConfirmDialog(null, "Bạn có muốn thoát chương trình không?",null, JOptionPane.YES_NO_OPTION);
+	        if (hoi == JOptionPane.YES_OPTION)
+	        {
+	        	try
+	        	{
+	        		fileWriter.close();
+	        	}
+	        	catch(IOException ex)
+	        	{
+	        		JOptionPane.showMessageDialog(null, "Lỗi đóng file");
+	        	}
+	            System.exit(0);
+	        }
+		}
+		
 	@Override
 	public void windowClosing(WindowEvent e)
 	{

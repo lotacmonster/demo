@@ -86,7 +86,9 @@ public class HienThiMain extends WindowAdapter{
 		
 		if(tinNhan.startsWith("Thoi gian: "))
 		{
-			giaoDienHienThi.hienThiThoiGian(" "+tinNhan.substring(11));
+			String hienThi = tinNhan.substring(11);
+			if(hienThi.length()<2) hienThi = "0" + hienThi;
+			giaoDienHienThi.hienThiThoiGian(" "+ hienThi);
 			return ;
 		}
 		

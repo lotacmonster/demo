@@ -42,11 +42,12 @@ public class GiaoDienChinh extends Frame implements ActionListener{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	MainServer mainServer;
+	public MainServer mainServer;
 	JTextArea hienThiTraLoi;
 	JTextArea hienThiMayKetNoi;
 	JTextField thietLapThoiGian;
-	String actionChay = "run", actionCancel = "cancel", actionReset = "reset";
+	JLabel nguoiChoi1, nguoiChoi2, nguoiChoi3, nguoiChoi4;
+	String actionChay = "run", actionCancel = "cancel", actionReset = "reset", actionDiem = "setdiem";
 	JLabel thoiGian;
 	JScrollPane cuonHienThiTraLoi, cuonHienThiMay;
 	Border border = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 10);
@@ -54,10 +55,9 @@ public class GiaoDienChinh extends Frame implements ActionListener{
 	Menu menuCaiDat, menuHelp;
 	
 	MenuItem itemUser, itemExit, itemHelp;
-	GiaoDienTuyChon giaoDienTuyChon = new GiaoDienTuyChon(this);
+	public GiaoDienTuyChon giaoDienTuyChon; 
 	int phut=0, giay=0;
-	boolean ngatThoiGian = false;
-	boolean dongHoDangChay = false;
+	boolean daBatDau = false, daKetThuc = false, daReset = true;
 
 	int thoiGianChay = 0;
 	Timer timer;
@@ -108,8 +108,16 @@ public class GiaoDienChinh extends Frame implements ActionListener{
 	 */
 	JPanel taoPanelDiem()
 	{
-		JPanel panel = new JPanel();
-		panel.add(taoNhan("Thanh chứa điểm"));
+		JPanel panel = new JPanel(new GridLayout(2, 4));
+		panel.add(nguoiChoi1 = new JLabel(" "+mainServer.idDangNhap[0] + " = " + mainServer.tenNguoiChoi[0]));
+		panel.add(nguoiChoi2 = new JLabel(" "+mainServer.idDangNhap[1] + " = " + mainServer.tenNguoiChoi[1]));
+		panel.add(nguoiChoi3 = new JLabel(" "+mainServer.idDangNhap[2] + " = " +mainServer.tenNguoiChoi[2]));
+		panel.add(nguoiChoi4 = new JLabel(" "+mainServer.idDangNhap[3] + " = " + mainServer.tenNguoiChoi[3]));
+		nguoiChoi1.setFont(new Font("Arial", 3, 20));
+		nguoiChoi2.setFont(new Font("Arial", 3, 20));
+		nguoiChoi3.setFont(new Font("Arial", 3, 20));
+		nguoiChoi4.setFont(new Font("Arial", 3, 20));
+
 		return panel;
 	}
 	
@@ -205,6 +213,9 @@ public class GiaoDienChinh extends Frame implements ActionListener{
 		return nut;
 	}
 	
+	/*
+	 * 
+	 */
 	
 	public void hienThiTrangThaiMay(String tinNhan)
 	{
@@ -221,6 +232,17 @@ public class GiaoDienChinh extends Frame implements ActionListener{
 		hienThiTraLoi.setText("");
 	}
 	
+	public void hienThiNguoiChuoi()
+	{
+		nguoiChoi1.setText(" "+mainServer.idDangNhap[0] + " = " + mainServer.tenNguoiChoi[0]);
+		nguoiChoi2.setText(" "+mainServer.idDangNhap[1] + " = " + mainServer.tenNguoiChoi[1]);
+		nguoiChoi3.setText(" "+mainServer.idDangNhap[2] + " = " + mainServer.tenNguoiChoi[2]);
+		nguoiChoi4.setText(" "+mainServer.idDangNhap[3] + " = " + mainServer.tenNguoiChoi[3]);		
+	}
+	
+	/*
+	 * 
+	 */
 	public void hienThi()
 	{
 		this.setVisible(true);
@@ -262,9 +284,11 @@ public class GiaoDienChinh extends Frame implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		if(e.getActionCommand().equals(actionChay) && !dongHoDangChay)
+		if(e.getActionCommand().equals(actionChay) && daReset)
 		{
-			dongHoDangChay = true;
+			daBatDau = true;
+			daReset = false;
+			daKetThuc = false;
 			mainServer.taoThoiGianBatDau();
 			if(thoiGianChay == 0)
 				{
@@ -290,16 +314,21 @@ public class GiaoDienChinh extends Frame implements ActionListener{
 			thoiGianChay = 0;
 		}
 		
-		if(e.getActionCommand().equals(actionReset)&& dongHoDangChay)
+		if(e.getActionCommand().equals(actionReset)&& daKetThuc)
 		{
+			daBatDau = false;
+			daKetThuc = false;
+			daReset = true;
 			thoiGian.setText(" 00 ");
 			mainServer.guiTinNhanDenToanBo("Reset: ");
 			mainServer.resetBangRank();
-			dongHoDangChay = false;
 		}
 		
-		if(e.getActionCommand().equals(actionCancel) && dongHoDangChay)
+		if(e.getActionCommand().equals(actionCancel) && daBatDau)
 		{
+			daKetThuc = true;
+			daReset = false;
+			daBatDau = false;
 			thoiGian.setText(thoiGian.getText()+"  Gián đoạn");
 			timer.cancel();
 			mainServer.guiTinNhanDenToanBo("Ket thuc: ");
@@ -314,13 +343,18 @@ public class GiaoDienChinh extends Frame implements ActionListener{
 		if(e.getSource() == itemUser)
 		{
 			this.anDi();
+			giaoDienTuyChon= new GiaoDienTuyChon(this);
 			giaoDienTuyChon.hienThi();
+			return ;
 		}
 		
 		if(e.getActionCommand().equalsIgnoreCase("Help"))
 		{
 			JOptionPane.showMessageDialog(null, "Mọi thắc mắc xin liên hệ: nc.dinh15t2@gmail.com");
+			return ;
 		}
+		
+		
 	}
 	
 }

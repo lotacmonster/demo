@@ -72,7 +72,7 @@ public class GiaoDienVongChoi extends Frame implements ActionListener{
 		panel.add(nhanTenNguoiChoi);
 		
 		JPanel panelRight = new JPanel(new GridLayout(1, 2));
-		nhanDiemSo = new JLabel("ĐIỂM: 000");
+		nhanDiemSo = new JLabel("######");
 		nhanDiemSo.setFont(new Font(font, Font.BOLD, kichCoDiemSo));
 		nhanThoiGian = new JLabel("THỜI GIAN: 00");
 		nhanThoiGian.setFont(new Font(font, Font.BOLD, kichCoThoiGian));
